@@ -78,6 +78,34 @@ router.post( '/', async( req, res ) =>{
     }
 });
 
+router.post( '/:idtarea/comment', async( req, res ) => {
+    try {
+        const { idtarea } = req.params;
+        const { comentario } = req.body;
+        
+        if( !comentario ) return res.status( 400 ).send(['The param cannot go empty']);
+        if( +idtarea < 0 ) return res.status( 400 ).send(['This param is not valid']);
+        
+        const data = { comentario, idtarea };
+        
+        connection.query( `SELECT COUNT(*) AS count FROM tarea WHERE idtarea = ${ idtarea }`, (err, result) => {
+            if( err ) return res.status( 400 ).send([ err.message ]);
+            const [{ count }] = result;
+
+            if( count === 1 ) {
+                connection.query( 'INSERT INTO comentarios SET ?', data, 
+                    ( err, result, fields ) => {
+                    if( err ) return res.status( 400 ).send([ err.message ]);
+                    return res.status( 200 ).send(['Comment created']);
+                });
+            } else return res.status( 400 ).send(['Task not found by this idtarea']);
+        });
+
+    } catch (error) {
+        return res.status( 500 ).send([ error.message ]);
+    }
+});
+
 router.put( '/:idtarea', async( req, res ) =>{
     try {
         const { idtarea } = req.params;
