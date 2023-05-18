@@ -51,15 +51,18 @@ router.get( '/search', async( req, res ) =>{});
 
 router.post( '/', async( req, res ) =>{
     try {
-        const { titulo, descripcion, fechaEntrega, esPublica, idCreador, idResponsable, tags, archivo, compartidoList } = req.body;
+        const { titulo, descripcion, fechaEntrega, esPublica, idCreador, tags, archivo, compartidoList } = req.body;
+    
         if( !titulo || !descripcion || !fechaEntrega || !esPublica || !idCreador ) return res.status( 400 ).send(['The param cannot go empty']);
-
-        connection.query( 'INSERT INTO tarea (`titulo`, `descripcion`, `estatus`, `fechaEntrega`, `esPublica`, `idCreador`, `idResponsable`, `tags`, `archivo`) VALUE' + ` ('${ titulo }', '${ descripcion }', 1, '${ fechaEntrega }', ${ esPublica }, ${ idCreador }, ${ idResponsable }, ${ tags }, ${ archivo });`, 
+        
+        const data = { titulo, descripcion, estatus: 1, fechaEntrega, esPublica, idCreador, tags, archivo };
+        
+        connection.query( 'INSERT INTO tarea SET ?', data, 
             ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
 
             const { insertId } = result;
-            if( compartidoList.length && esPublica == 3 ) {
+            if( compartidoList && compartidoList.length ) {
                 connection.query( 'INSERT INTO compartido (`idtarea`, `idusuario`) VALUE ?',
                 [ compartidoList.map( user => [ insertId, user ]) ], 
                 ( err, result, fields ) => {
@@ -75,7 +78,44 @@ router.post( '/', async( req, res ) =>{
     }
 });
 
-router.put( '/:idtarea', async( req, res ) =>{});
+router.put( '/:idtarea', async( req, res ) =>{
+    try {
+        const { idtarea } = req.params;
+        const { titulo, descripcion, fechaEntrega, estatus, esPublica, idResponsable, tags, archivo, compartidoList, idEditor } = req.body;
+        
+        connection.query(' CALL GET_EDITOR( ?, ? );', [ idtarea, idEditor || idResponsable ], ( err, result, fields ) => {
+            if( err ) return res.status( 400 ).send([ err.message ]);
+            if( result.length > 2 ) {
+                const [{ count : esCreador }] = result[0];
+                const [{ count: esResponsable }] = result[1];
+
+                if( esCreador === 1 || esResponsable === 1 ) {
+                    const data = idResponsable ? { titulo, descripcion, estatus, fechaEntrega, esPublica, idResponsable, tags, archivo } : { titulo, descripcion, estatus, fechaEntrega, esPublica, tags, archivo };
+        
+                    connection.query( `UPDATE tarea SET ? WHERE idtarea= ${ idtarea }`, data, 
+                        ( err, result, fields ) => {
+                        if( err ) return res.status( 400 ).send([ err.message ]);
+
+                        const { insertId } = result;
+                        if( compartidoList && compartidoList.length ) {
+                            connection.query( 'INSERT INTO compartido (`idtarea`, `idusuario`) VALUE ?',
+                            [ compartidoList.map( user => [ insertId, user ]) ], 
+                            ( err, result, fields ) => {
+                                if( err ) return res.status( 400 ).send([ err.message ]);
+                                return res.status( 200 ).send(['updated task']);
+                            });
+                        }
+                        else return res.status( 200 ).send(['updated task']);
+                    });
+                } else return res.status( 204 ).send(['Task not update']);
+            }
+            else return res.status( 201 ).send(['No response from Database']);
+        });
+        
+    } catch (error) {
+        return res.status( 500 ).send([ error.message ]);
+    }
+});
 
 router.delete( '/:idtarea', async( req, res ) =>{
     try {
