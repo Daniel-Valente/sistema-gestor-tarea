@@ -111,15 +111,18 @@ router.put( '/:idtarea', async( req, res ) =>{
         const { idtarea } = req.params;
         const { titulo, descripcion, fechaEntrega, estatus, esPublica, idResponsable, tags, archivo, compartidoList, idEditor } = req.body;
         
-        connection.query(' CALL GET_EDITOR( ?, ? );', [ idtarea, idEditor || idResponsable ], ( err, result, fields ) => {
+        connection.query(' CALL Get_Editor( ?, ?, ? );', [ idtarea, idEditor, idResponsable ], ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
             if( result.length > 2 ) {
                 const [{ count : esCreador }] = result[0];
-                const [{ count: esResponsable }] = result[1];
+                const [{ count : seCompartio }] = result[1];
+                const [{ count: responsable }] = result[2];
 
-                if( esCreador === 1 || esResponsable === 1 ) {
+                if( esCreador === 1 || seCompartio === 1 ) {
                     const data = idResponsable ? { titulo, descripcion, estatus, fechaEntrega, esPublica, idResponsable, tags, archivo } : { titulo, descripcion, estatus, fechaEntrega, esPublica, tags, archivo };
-        
+                    
+                    if( responsable !== 1 ) return res.status( 400 ).send(['this user cannot be responsible for this task']);
+
                     connection.query( `UPDATE tarea SET ? WHERE idtarea= ${ idtarea }`, data, 
                         ( err, result, fields ) => {
                         if( err ) return res.status( 400 ).send([ err.message ]);
