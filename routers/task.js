@@ -51,13 +51,23 @@ router.get( '/search', async( req, res ) =>{});
 
 router.post( '/', async( req, res ) =>{
     try {
-        const { titulo, descripcion, fechaEntrega, esPublica, idCreador, idResponsable, tags, archivo  } = req.body;
+        const { titulo, descripcion, fechaEntrega, esPublica, idCreador, idResponsable, tags, archivo, compartidoList } = req.body;
         if( !titulo || !descripcion || !fechaEntrega || !esPublica || !idCreador ) return res.status( 400 ).send(['The param cannot go empty']);
 
         connection.query( 'INSERT INTO tarea (`titulo`, `descripcion`, `estatus`, `fechaEntrega`, `esPublica`, `idCreador`, `idResponsable`, `tags`, `archivo`) VALUE' + ` ('${ titulo }', '${ descripcion }', 1, '${ fechaEntrega }', ${ esPublica }, ${ idCreador }, ${ idResponsable }, ${ tags }, ${ archivo });`, 
             ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
-            return res.status( 200 ).send(['Task created']);
+
+            const { insertId } = result;
+            if( compartidoList.length && esPublica == 3 ) {
+                connection.query( 'INSERT INTO compartido (`idtarea`, `idusuario`) VALUE ?',
+                [ compartidoList.map( user => [ insertId, user ]) ], 
+                ( err, result, fields ) => {
+                    if( err ) return res.status( 400 ).send([ err.message ]);
+                    return res.status( 200 ).send(['Task created']);
+                });
+            }
+            else return res.status( 200 ).send(['Task created']);
         });
 
     } catch (error) {
