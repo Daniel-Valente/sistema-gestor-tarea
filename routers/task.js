@@ -14,7 +14,7 @@ router.get( '/', async( req, res ) =>{
                 return res.status(200).json( result );
             });
         } else {
-            connection.query(' CALL Get_Pagination( ?, ? );', [ +limit, +page ], ( err, result, fields ) => {
+            connection.query(' CALL Get_Task_Pagination( ?, ? );', [ +limit, +page ], ( err, result, fields ) => {
                 if( err ) return res.status( 400 ).send([ err.message ]);
                 if( result.length > 2 ) {
                     const data = result[0];
