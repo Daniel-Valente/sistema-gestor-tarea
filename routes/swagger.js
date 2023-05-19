@@ -18,8 +18,9 @@ const options = {
                 email: "valente.gar.daniel@gmail.com",
             },
         },
-        servers: [{
-                url: `http://localhost:5000/`,
+        servers: [
+            {
+                url: "http://localhost:5000",
             },
         ],
     },
@@ -31,7 +32,7 @@ const swaggerSpec = swaggerJSDoc( options );
 
 /* Function to setup our docs*/
 const swaggerDocs = ( app, port ) => {
-    app.use( '/v1/docs', swaggerUi.serve, swaggerUi.setup( swaggerSpec ));
+    app.use( '/v1/docs', swaggerUi.serve, swaggerUi.setup( swaggerSpec, { explorer: true } ));
 
     app.get( '/v1/docs.json', ( req, res ) => {
         res.setHeader( 'Content-Type', 'application/json' );
