@@ -1,0 +1,29 @@
+{
+    "status": "OK",
+    "data": [
+        {
+            "idtarea": 21,
+            "titulo": "Sistema gestor de tareas",
+            "descripcion": "Un sistema para realizar la gestión de diversas tareas",
+            "idCreador": 1,
+            "fechaEntrega": "2023-05-19T05:00:00.000Z",
+            "idResponsable": null
+        },
+        {
+            "idtarea": 22,
+            "titulo": "Monitoreo de tarea",
+            "descripcion": "Monitorear las tareas que sea creadas en el sistema",
+            "idCreador": 1,
+            "fechaEntrega": "2023-05-25T05:00:00.000Z",
+            "idResponsable": null
+        }
+    ],
+    "pagination": [
+        {
+            "pageSize": 5,
+            "pageIndex": 1,
+            "totalCount": 2,
+            "totalPages": "1"
+        }
+    ]
+}

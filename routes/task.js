@@ -72,7 +72,7 @@ router.get( '/', async( req, res ) =>{
  *     parameters:
  *        - in: path
  *          name: idtarea
- *          shema:
+ *          schema:
  *             type: integer
  *             required: true
  *             description: Numeric ID of the task to get
@@ -125,7 +125,7 @@ router.get( '/search', async( req, res ) =>{});
  *     parameters:
  *         - in: body
  *           name: data
- *           shema:
+ *           schema:
  *              type: object
  *              propierties:
  *                  titulo:
@@ -207,7 +207,6 @@ router.post( '/', async( req, res ) =>{
     }
 });
 
-
 /**
  * @openapi
  * /task/{idtarea}/comment:
@@ -218,13 +217,13 @@ router.post( '/', async( req, res ) =>{
  *     parameters:
  *         - in: path
  *           name: idtarea
- *           shema:
+ *           schema:
  *             type: integer
  *             required: true
  *             description: Numeric ID of the task to get
  *         - in: body
  *           name: data
- *           shema:
+ *           schema:
  *              type: object
  *              propierties:
  *                  comentario:
@@ -291,12 +290,12 @@ router.post( '/:idtarea/comment', async( req, res ) => {
  *     parameters:
  *         - in: path
  *           name: idtarea
- *           shema:
+ *           schema:
  *              type: integer
  *              required: true
  *         - in: body
  *           name: data
- *           shema:
+ *           schema:
  *              type: object
  *              propierties:
  *                  titulo:
@@ -406,7 +405,7 @@ router.put( '/:idtarea', async( req, res ) =>{
  *     parameters:
  *         - in: path
  *           name: idtarea
- *           shema:
+ *           schema:
  *             type: integer
  *             required: true
  *             description: Numeric ID of the task to get
@@ -425,7 +424,9 @@ router.put( '/:idtarea', async( req, res ) =>{
  *                   type: array 
  *                   items: 
  *                     type: object
- */
+ *       400:
+ *         description: Bad Request 
+*/
 router.delete( '/:idtarea', async( req, res ) =>{
     try {
         const { idtarea } = req.params;
@@ -433,9 +434,8 @@ router.delete( '/:idtarea', async( req, res ) =>{
 
         connection.query(`DELETE FROM tarea WHERE idtarea = ${ +idtarea } AND esPublica = 1;`, ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
-            if( !result.length ) return res.status( 400 ).send(['Content not found by this idtarea']);
             
-            return res.status(200).json( result );
+            return res.status(200).json( 'Task deleted' );
         });
 
     } catch (error) {
