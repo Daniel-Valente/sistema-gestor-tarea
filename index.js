@@ -16,6 +16,7 @@ app.get( '/', ( req, res ) => res.status(200).json({ message: "This server is on
 
 app.use( '/task', require('./routes/task'));
 app.use( '/user', require('./routes/user'));
+app.use( '/bitacora', require('./routes/bitacora'));
 
 app.listen( port, () => {
     console.log(` This server is running on port ${ port }`);

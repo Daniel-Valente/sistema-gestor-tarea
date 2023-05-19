@@ -40,7 +40,7 @@ router.get( '/', async( req, res ) =>{
         const { page, limit } =  req.query;
 
         if( !page || !limit ) {
-            connection.query(' SELECT idtarea, titulo, descripcion, idCreador, fechaEntrega, idResponsable FROM tarea WHERE esPublica = 1;', ( err, result, fields ) => {
+            connection.query(' SELECT idtarea, titulo, descripcion, idCreador, fechaEntrega, idResponsable FROM tareas WHERE esPublica = 1;', ( err, result, fields ) => {
                 if( err ) return res.status( 400 ).send([ err.message ]);
 
                 return res.status(200).json( result );
@@ -91,7 +91,7 @@ router.get( '/', async( req, res ) =>{
  *                   type: array 
  *                   items: 
  *                     type: object
- *       204:
+ *       404:
  *         description: Not Found  
  *       400:
  *         description: Bad Request 
@@ -101,9 +101,9 @@ router.get( '/:idtarea', async( req, res ) =>{
         const { idtarea } = req.params;
         if( +idtarea < 0 ) return res.status( 400 ).send(['This param is not valid']);
 
-        connection.query(`SELECT * FROM tarea WHERE idtarea = ${ +idtarea };`, ( err, result, fields ) => {
+        connection.query(`SELECT * FROM tareas WHERE idtarea = ${ +idtarea };`, ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
-            if( !result.length ) return res.status( 400 ).send(['Content not found by this idtarea']);
+            if( !result.length ) return res.status( 404 ).send(['Content not found by this idtarea']);
             
             return res.status(200).json( result );
         });
@@ -186,7 +186,7 @@ router.post( '/', async( req, res ) =>{
         
         const data = { titulo, descripcion, estatus: 1, fechaEntrega, esPublica, idCreador, tags, archivo };
         
-        connection.query( 'INSERT INTO tarea SET ?', data, 
+        connection.query( 'INSERT INTO tareas SET ?', data, 
             ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
 
@@ -247,7 +247,7 @@ router.post( '/', async( req, res ) =>{
  *                   type: array 
  *                   items: 
  *                     type: object
- *       204:
+ *       404:
  *         description: Not Found  
  *       400:
  *         description: Bad Request 
@@ -262,7 +262,7 @@ router.post( '/:idtarea/comment', async( req, res ) => {
         
         const data = { comentario, idtarea };
         
-        connection.query( `SELECT COUNT(*) AS count FROM tarea WHERE idtarea = ${ idtarea }`, (err, result) => {
+        connection.query( `SELECT COUNT(*) AS count FROM tareas WHERE idtarea = ${ idtarea }`, (err, result) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
             const [{ count }] = result;
 
@@ -272,7 +272,7 @@ router.post( '/:idtarea/comment', async( req, res ) => {
                     if( err ) return res.status( 400 ).send([ err.message ]);
                     return res.status( 200 ).send(['Comment created']);
                 });
-            } else return res.status( 400 ).send(['Task not found by this idtarea']);
+            } else return res.status( 404 ).send(['Task not found by this idtarea']);
         });
 
     } catch (error) {
@@ -348,7 +348,7 @@ router.post( '/:idtarea/comment', async( req, res ) => {
  *                   type: array 
  *                   items: 
  *                     type: object
- *       204:
+ *       404:
  *         description: Not Found  
  *       400:
  *         description: Bad Request 
@@ -370,7 +370,7 @@ router.put( '/:idtarea', async( req, res ) =>{
                     
                     if( responsable !== 1 ) return res.status( 400 ).send(['this user cannot be responsible for this task']);
 
-                    connection.query( `UPDATE tarea SET ? WHERE idtarea= ${ idtarea }`, data, 
+                    connection.query( `UPDATE tareas SET ? WHERE idtarea= ${ idtarea }`, data, 
                         ( err, result, fields ) => {
                         if( err ) return res.status( 400 ).send([ err.message ]);
 
@@ -385,7 +385,7 @@ router.put( '/:idtarea', async( req, res ) =>{
                         }
                         else return res.status( 200 ).send(['updated task']);
                     });
-                } else return res.status( 204 ).send(['Task not update']);
+                } else return res.status( 404 ).send(['Task not update']);
             }
             else return res.status( 201 ).send(['No response from Database']);
         });
@@ -432,7 +432,7 @@ router.delete( '/:idtarea', async( req, res ) =>{
         const { idtarea } = req.params;
         if( +idtarea < 0 ) return res.status( 400 ).send(['This param is not valid']);
 
-        connection.query(`DELETE FROM tarea WHERE idtarea = ${ +idtarea } AND esPublica = 1;`, ( err, result, fields ) => {
+        connection.query(`DELETE FROM tareas WHERE idtarea = ${ +idtarea } AND esPublica = 1;`, ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
             
             return res.status(200).json( 'Task deleted' );

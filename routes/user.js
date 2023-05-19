@@ -39,7 +39,7 @@ router.get( '/', async( req, res ) => {
         const { page, limit } =  req.query;
 
         if( !page || !limit ) {
-            connection.query(' SELECT * FROM usuario;', ( err, result, fields ) => {
+            connection.query(' SELECT * FROM usuarios;', ( err, result, fields ) => {
                 if( err ) return res.status( 400 ).send([ err.message ]);
 
                 return res.status(200).json( result );
@@ -90,7 +90,7 @@ router.get( '/', async( req, res ) => {
  *                   type: array 
  *                   items: 
  *                     type: object
- *       204:
+ *       404:
  *         description: Not Found  
  *       400:
  *         description: Bad Request 
@@ -100,9 +100,9 @@ router.get( '/:idusuario', async( req, res ) => {
         const { idusuario } = req.params;
         if( +idusuario < 0 ) return res.status( 400 ).send(['This param is not valid']);
 
-        connection.query(`SELECT * FROM usuario WHERE idusuario = ${ +idusuario };`, ( err, result, fields ) => {
+        connection.query(`SELECT * FROM usuarios WHERE idusuario = ${ +idusuario };`, ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
-            if( !result.length ) return res.status( 400 ).send(['Content not found by this idusuario']);
+            if( !result.length ) return res.status( 404 ).send(['Content not found by this idusuario']);
             
             return res.status(200).json( result );
         });
@@ -159,7 +159,7 @@ router.post( '/', async( req, res ) => {
         if( !nombreCompleto || !rol ) return res.status( 400 ).send(['The param cannot go empty']);
         if( +rol < 0 ) return res.status( 400 ).send(['This param is not valid']);
 
-        connection.query( 'INSERT INTO usuario (`nombreCompleto`, `rol`) VALUE' + ` ('${ nombreCompleto }', ${ +rol });`, 
+        connection.query( 'INSERT INTO usuarios (`nombreCompleto`, `rol`) VALUE' + ` ('${ nombreCompleto }', ${ +rol });`, 
             ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
             return res.status( 200 ).send(['user created']);
@@ -212,7 +212,7 @@ router.post( '/', async( req, res ) => {
  *                   type: array 
  *                   items: 
  *                     type: object
- *       204:
+ *       404:
  *         description: Not Found
  *       400:
  *         description: Bad Request 
@@ -256,7 +256,7 @@ router.delete( '/:idusuario', async(req, res) => {
         const { idusuario } = req.params;
         if( +idusuario < 0 ) return res.status( 400 ).send(['This param is not valid']);
 
-        connection.query(`DELETE FROM usuario WHERE idusuario = ${ +idusuario };`, ( err, result, fields ) => {
+        connection.query(`DELETE FROM usuarios WHERE idusuario = ${ +idusuario };`, ( err, result, fields ) => {
             if( err ) return res.status( 400 ).send([ err.message ]);
             
             return res.status(200).json( 'User deleted' );
